@@ -15,24 +15,27 @@ def get_timeline():
 	auth = authorization.authorize()
 	response = requests.get(TIMELINE_URL, auth=auth)
 	return json.dumps(response[text].json(), indent=4)
+## FIGURE OUT WHAT TYPE OF STUFF WE'RE WORKING WITH	
+	##print json.dumps(response.json(), indent=4)
+	##print type(response.json())   -> list
 
 def get_mentions():
 	logging.debug("Get Mentions")
 	auth = authorization.authorize()
 	response = requests.get(MENTIONS_URL, auth=auth)
-##This guy should only print the "text" part, and leave out the rest of the info.. but it tdoesn't.
-	#for t in response:
-		#print t.text.encode('utf8')
-		#print t.user.screen_name
-##This guy prints everything.
-	return json.dumps(response.json(), indent=4)
+##This guy prints out only a few items
+	for t in response.json():
+		print "HERE'S A TWEET"
+		print t["text"]
+		print t["user"]["name"]
+		print t["user"]["screen_name"]
+		print t["created_at"]
+		print ''
 
-def search_for(term):
-	logging.debug("Search for...")
-	auth = authorization.authorize()
-	response = requests.get(SEARCH_URL, term=term, auth=auth)
-	for t in response:
-		print t.text.encode('utf-8')
+##This guy prints everything.
+	#return json.dumps(response.json(), indent=4)
+
+
 
 def make_parser():
 	"""Construct the command line parser """
@@ -50,12 +53,11 @@ def make_parser():
 	logging.debug("Constructing get_mentions subparser")
 	mentions_parser = subparsers.add_parser("mentions", help = "Get your mentions")
 	mentions_parser.add_argument("text", nargs="?", help="The text of the tweet")
-	
-	# Subparser for the search command
-	logging.debug("Constructing search_for subparser")
-	search_parser = subparsers.add_parser("search", help = "Search for a specific tweet text")
-	search_parser.add_argument("term", help="The term you are searching for")
+	mentions_parser.add_argument("user(name)", nargs="?", help="The name of the person who sent the tweet")
+	mentions_parser.add_argument("user(screen_name)", nargs="?", help="The screenname of the person who sent the tweet")
+	mentions_parser.add_argument("created_at", nargs="?", help="The date the tweet was sent")
 
+	
 	return parser
 
 
@@ -78,9 +80,6 @@ def main():
 	elif command == "mentions":
 		my_mentions = get_mentions()
 		print "Getting mentions info '{}'".format(my_mentions)
-	elif command == "search":
-		my_search = search_for(**arguments)
-		print "Getting search info '{}'".format(my_search)
 
 
 
